@@ -109,8 +109,6 @@ Thumbs.db
 
 # Static files
 /staticfiles/
-/static/
-!/static/css/
 
 # Media files
 /media/

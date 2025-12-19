@@ -1,207 +1,182 @@
-# Medicine Recommendation System
+# MediMatch - Medicine Recommendation System
 
-An AI-powered medicine recommendation system built with Django, Machine Learning, HTML, CSS, and Bootstrap.
+An intelligent medicine recommendation system that helps users find appropriate over-the-counter medications based on their symptoms using machine learning.
 
 ## Features
 
-- **AI-Powered Recommendations**: Uses TF-IDF and Cosine Similarity for accurate medicine suggestions
-- **User-Friendly Interface**: Clean and responsive design with Bootstrap 5
-- **Comprehensive Information**: Detailed medicine info including usage, side effects, and precautions
-- **Query History**: Track past recommendations
-- **Responsive Design**: Works seamlessly on all devices
+- 🤖 AI-powered medicine recommendations
+- 🌐 Multi-language support (English & Hindi)
+- 📊 Personalized recommendations based on age, gender, and medical history
+- 📜 Query history tracking
+- 🎨 Modern, responsive UI with Bootstrap 5
 
-## Technology Stack
+## Technologies Used
 
-### Backend
-- Django 5.0
-- Python 3.x
-- scikit-learn (Machine Learning)
-- pandas & numpy (Data Processing)
+- **Backend:** Django 5.0
+- **Machine Learning:** scikit-learn, pandas, numpy
+- **Translation:** deep-translator
+- **Frontend:** Bootstrap 5, Font Awesome
+- **Database:** SQLite (development), PostgreSQL (production-ready)
 
-### Frontend
-- HTML5
-- CSS3
-- Bootstrap 5
-- Font Awesome Icons
+## Installation
 
-## Installation Guide
+### Prerequisites
 
-### Step 1: Clone or Navigate to the Project
+- Python 3.11+
+- pip
+- virtualenv (recommended)
+
+### Setup
+
+1. Clone the repository:
 ```bash
-cd c:\Users\adity\OneDrive\Desktop\hggg
+git clone https://github.com/AdityaHire/MediMatch.git
+cd MediMatch
 ```
 
-### Step 2: Create Virtual Environment
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-### Step 3: Activate Virtual Environment
-**Windows:**
-```bash
-venv\Scripts\activate
-```
-
-**Linux/Mac:**
-```bash
-source venv/bin/activate
-```
-
-### Step 4: Install Dependencies
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 5: Run Migrations
+4. Create a `.env` file from the example:
 ```bash
-python manage.py makemigrations
+cp .env.example .env
+```
+
+5. Update the `.env` file with your configuration:
+```
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+6. Run migrations:
+```bash
 python manage.py migrate
 ```
 
-### Step 6: Create Superuser (Optional - for Admin Panel)
+7. Compile translations:
 ```bash
-python manage.py createsuperuser
+python compile_translations.py
 ```
 
-### Step 7: Run the Development Server
+8. Collect static files:
+```bash
+python manage.py collectstatic --noinput
+```
+
+9. Run the development server:
 ```bash
 python manage.py runserver
 ```
 
-### Step 8: Access the Application
-Open your browser and visit:
-- **Main Application**: http://127.0.0.1:8000/
-- **Admin Panel**: http://127.0.0.1:8000/admin/
+Visit `http://127.0.0.1:8000` in your browser.
+
+## Deployment
+
+### Heroku
+
+1. Install Heroku CLI and login:
+```bash
+heroku login
+```
+
+2. Create a new Heroku app:
+```bash
+heroku create your-app-name
+```
+
+3. Set environment variables:
+```bash
+heroku config:set SECRET_KEY=your-secret-key
+heroku config:set DEBUG=False
+heroku config:set ALLOWED_HOSTS=your-app-name.herokuapp.com
+```
+
+4. Deploy:
+```bash
+git push heroku main
+```
+
+5. Run migrations:
+```bash
+heroku run python manage.py migrate
+```
+
+### Other Platforms
+
+The project includes:
+- `Procfile` for Heroku
+- `runtime.txt` for Python version
+- `requirements.txt` for dependencies
+- WhiteNoise for static file serving
+
+Compatible with: Heroku, Render, Railway, PythonAnywhere, and other PaaS platforms.
+
+## Configuration
+
+### Environment Variables
+
+- `SECRET_KEY`: Django secret key (required for production)
+- `DEBUG`: Debug mode (False for production)
+- `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
+
+## Usage
+
+1. Navigate to "Get Recommendation" page
+2. Enter your symptoms
+3. Provide age, gender, and medical history
+4. Select language preference (English/Hindi)
+5. Get personalized medicine recommendations
+6. View recommendation history
 
 ## Project Structure
 
 ```
-hggg/
-├── manage.py
-├── requirements.txt
-├── README.md
-├── medicine_project/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
-├── recommendation/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── forms.py
-│   ├── views.py
-│   ├── urls.py
-│   └── ml_model.py
-├── templates/
-│   ├── base.html
-│   └── recommendation/
-│       ├── home.html
-│       ├── recommend.html
-│       ├── results.html
-│       ├── about.html
-│       └── history.html
-└── static/
-    └── css/
-        └── style.css
+MediMatch/
+├── medicine_project/      # Django project settings
+├── recommendation/        # Main application
+│   ├── models.py         # Database models
+│   ├── views.py          # View logic
+│   ├── forms.py          # Forms
+│   ├── ml_model.py       # ML recommendation engine
+│   └── urls.py           # URL routing
+├── templates/            # HTML templates
+├── static/              # Static files (CSS, images)
+├── locale/              # Translation files
+├── requirements.txt     # Python dependencies
+├── Procfile            # Heroku deployment
+└── runtime.txt         # Python version
 ```
-
-## How It Works
-
-1. **User Input**: Patient enters symptoms, age, gender, and medical history
-2. **Text Processing**: System processes the input using NLP techniques
-3. **ML Analysis**: TF-IDF vectorization and cosine similarity matching
-4. **Recommendations**: Top matching medicines with detailed information
-5. **Results Display**: Comprehensive medicine information with usage instructions
-
-## Machine Learning Model
-
-The system uses:
-- **TF-IDF Vectorization**: Converts symptoms into numerical vectors
-- **Cosine Similarity**: Measures similarity between symptoms and medicine profiles
-- **Content-Based Filtering**: Recommends medicines based on symptom matching
-
-## Features Explained
-
-### 1. Home Page
-- Introduction to the system
-- Feature highlights
-- Call-to-action buttons
-
-### 2. Recommendation Page
-- Symptom input form
-- Patient information collection
-- Form validation
-
-### 3. Results Page
-- Top medicine recommendations
-- Similarity scores
-- Detailed medicine information
-- Usage instructions and precautions
-
-### 4. History Page
-- Past query records
-- Previous recommendations
-- Query timestamps
-
-### 5. About Page
-- System information
-- Technology stack details
-- ML model explanation
 
 ## Important Notes
 
-⚠️ **Medical Disclaimer**: This system is for educational and informational purposes only. Always consult a qualified healthcare professional before taking any medication.
+⚠️ **Medical Disclaimer:** This system is for informational purposes only and should not replace professional medical advice. Always consult with a healthcare provider before taking any medication.
 
-## Customization
+## Developer
 
-### Adding More Medicines
-Edit the `_load_medicine_data()` method in `recommendation/ml_model.py` to add more medicines to the database.
+**Aditya Hire**
 
-### Modifying Styles
-Edit `static/css/style.css` to customize the appearance.
-
-### Changing ML Model
-You can enhance the ML model in `recommendation/ml_model.py` by:
-- Adding more sophisticated algorithms
-- Implementing deep learning models
-- Integrating external medical APIs
-
-## Troubleshooting
-
-### Issue: Module not found
-**Solution**: Make sure you've activated the virtual environment and installed all requirements.
-
-### Issue: Static files not loading
-**Solution**: Run `python manage.py collectstatic` and ensure `DEBUG = True` in development.
-
-### Issue: Database errors
-**Solution**: Delete `db.sqlite3` and run migrations again.
-
-## Future Enhancements
-
-- User authentication system
-- Export recommendations as PDF
-- Integration with pharmacy APIs
-- Multi-language support
-- Advanced ML models (Neural Networks)
-- Drug interaction warnings
-- Dosage calculator
-
-## Contributing
-
-Feel free to fork this project and submit pull requests for any improvements.
+- 📧 Email: adityahire08@gmail.com
+- 💼 LinkedIn: [linkedin.com/in/aditya-hire-2a0974357](https://www.linkedin.com/in/aditya-hire-2a0974357)
+- 🐙 GitHub: [github.com/adityahire08](https://github.com/adityahire08)
+- 🌐 Portfolio: [adityahire.github.io/myportfolio](https://adityahire.github.io/myportfolio/)
 
 ## License
 
-This project is for educational purposes.
+This project is open source and available under the MIT License.
 
-## Contact
+## Contributing
 
-For questions or feedback, please reach out through the application's contact form.
+Contributions, issues, and feature requests are welcome!
 
----
+## Support
 
-**Built with ❤️ using Django and Machine Learning**
+If you like this project, please give it a ⭐️ on GitHub!
