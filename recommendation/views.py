@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.decorators import login_required
 from .forms import SymptomForm
 from .models import PatientQuery
 from .ml_model import get_recommender
@@ -25,13 +28,13 @@ def translate_hindi_symptoms(symptoms):
         return symptoms
 
 
-def translate_medicine_to_hindi(recommendations, language_code):
-    """Translate medicine recommendations to Hindi using Google Translate"""
-    if language_code != 'hi':
+def translate_medicine_to_regional_language(recommendations, language_code):
+    """Translate medicine recommendations to Hindi or Marathi using Google Translate"""
+    if language_code not in ['hi', 'mr']:
         return recommendations
     
     translated_recommendations = []
-    translator = GoogleTranslator(source='en', target='hi')
+    translator = GoogleTranslator(source='en', target=language_code)
     
     for med in recommendations:
         translated_med = med.copy()
@@ -64,11 +67,13 @@ def home(request):
     return render(request, 'recommendation/home.html')
 
 
+@login_required
 def about(request):
     """About page view"""
     return render(request, 'recommendation/about.html')
 
 
+@login_required
 def recommend(request):
     """Medicine recommendation view"""
     if request.method == 'POST':
@@ -94,6 +99,7 @@ def recommend(request):
             
             # Save query to database
             query = form.save(commit=False)
+            query.user = request.user
             query.recommended_medicines = json.dumps(recommendations)
             query.save()
             
@@ -113,6 +119,7 @@ def recommend(request):
     return render(request, 'recommendation/recommend.html', {'form': form})
 
 
+@login_required
 def results(request):
     """Display recommendation results"""
     recommendations = request.session.get('recommendations', [])
@@ -125,7 +132,7 @@ def results(request):
     # Get current language and translate recommendations if Hindi
     from django.utils.translation import get_language
     current_language = get_language()
-    translated_recommendations = translate_medicine_to_hindi(recommendations, current_language)
+    translated_recommendations = translate_medicine_to_regional_language(recommendations, current_language)
     
     context = {
         'recommendations': translated_recommendations,
@@ -135,9 +142,10 @@ def results(request):
     return render(request, 'recommendation/results.html', context)
 
 
+@login_required
 def history(request):
     """View past queries"""
-    queries = PatientQuery.objects.all()[:10]  # Last 10 queries
+    queries = PatientQuery.objects.filter(user=request.user).order_by('-created_at')[:10]  # Last 10 queries for current user
     
     # Parse JSON recommendations for each query
     for query in queries:
@@ -147,3 +155,58 @@ def history(request):
             query.recommendations = []
     
     return render(request, 'recommendation/history.html', {'queries': queries})
+
+
+def user_login(request):
+    """User login view"""
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {username}!')
+                next_url = request.GET.get('next', 'home')
+                return redirect(next_url)
+            else:
+                messages.error(request, 'Invalid username or password.')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'recommendation/login.html', {'form': form})
+
+
+def user_register(request):
+    """User registration view"""
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created successfully for {username}! Please login.')
+            return redirect('login')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
+    else:
+        form = UserCreationForm()
+    
+    return render(request, 'recommendation/register.html', {'form': form})
+
+
+def user_logout(request):
+    """User logout view"""
+    logout(request)
+    messages.info(request, 'You have been logged out successfully.')
+    return redirect('home')

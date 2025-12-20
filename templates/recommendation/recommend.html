@@ -13,18 +13,26 @@
                 <div class="btn-group" role="group">
                     <form action="{% url 'set_language' %}" method="post" style="display: inline; margin-right: 5px;">
                         {% csrf_token %}
-                        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                        <input name="next" type="hidden" value="/recommend/">
                         <input name="language" type="hidden" value="en">
                         <button type="submit" class="btn btn-sm {% if LANGUAGE_CODE == 'en' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                             🇬🇧 English
                         </button>
                     </form>
-                    <form action="{% url 'set_language' %}" method="post" style="display: inline;">
+                    <form action="{% url 'set_language' %}" method="post" style="display: inline; margin-right: 5px;">
                         {% csrf_token %}
-                        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                        <input name="next" type="hidden" value="/recommend/">
                         <input name="language" type="hidden" value="hi">
                         <button type="submit" class="btn btn-sm {% if LANGUAGE_CODE == 'hi' %}btn-primary{% else %}btn-outline-primary{% endif %}">
                             🇮🇳 हिन्दी
+                        </button>
+                    </form>
+                    <form action="{% url 'set_language' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="/recommend/">
+                        <input name="language" type="hidden" value="mr">
+                        <button type="submit" class="btn btn-sm {% if LANGUAGE_CODE == 'mr' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            🇮🇳 मराठी
                         </button>
                     </form>
                 </div>
@@ -33,7 +41,7 @@
             <div class="card shadow-lg border-0">
                 <div class="card-header bg-primary text-white py-3">
                     <h3 class="mb-0">
-                        <i class="fas fa-stethoscope"></i> {% trans "Get Medicine Recommendation" %}
+                        <i class="fas fa-stethoscope"></i> {% trans "Medicine Recommendation" %}
                     </h3>
                 </div>
                 <div class="card-body p-4">

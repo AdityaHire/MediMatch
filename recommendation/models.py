@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class MedicineData(models.Model):
@@ -16,6 +17,7 @@ class MedicineData(models.Model):
 
 class PatientQuery(models.Model):
     """Model to store patient queries and recommendations"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     symptoms = models.TextField()
     age = models.IntegerField()
     gender = models.CharField(max_length=10)

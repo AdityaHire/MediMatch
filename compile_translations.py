@@ -21,13 +21,36 @@ def compile_po_to_mo(po_file, mo_file):
         return False
 
 if __name__ == '__main__':
-    po_file = 'locale/hi/LC_MESSAGES/django.po'
-    mo_file = 'locale/hi/LC_MESSAGES/django.mo'
+    success_count = 0
+    fail_count = 0
     
-    if os.path.exists(po_file):
-        if compile_po_to_mo(po_file, mo_file):
-            print('\n✓ Translation compilation successful!')
+    # Compile Hindi
+    po_file_hi = 'locale/hi/LC_MESSAGES/django.po'
+    mo_file_hi = 'locale/hi/LC_MESSAGES/django.mo'
+    
+    if os.path.exists(po_file_hi):
+        if compile_po_to_mo(po_file_hi, mo_file_hi):
+            success_count += 1
         else:
-            print('\n✗ Translation compilation failed!')
+            fail_count += 1
+            print()
     else:
-        print(f'✗ Error: {po_file} not found')
+        print(f'✗ Error: {po_file_hi} not found\n')
+    
+    # Compile Marathi
+    po_file_mr = 'locale/mr/LC_MESSAGES/django.po'
+    mo_file_mr = 'locale/mr/LC_MESSAGES/django.mo'
+    
+    if os.path.exists(po_file_mr):
+        if compile_po_to_mo(po_file_mr, mo_file_mr):
+            success_count += 1
+        else:
+            fail_count += 1
+            print()
+    else:
+        print(f'✗ Error: {po_file_mr} not found\n')
+    
+    if success_count > 0:
+        print(f'\n✓ Translation compilation successful! ({success_count} language(s))')
+    if fail_count > 0:
+        print(f'✗ {fail_count} language(s) failed!')
