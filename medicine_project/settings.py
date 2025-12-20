@@ -17,13 +17,22 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-chang
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+# Railway deployment - get the domain
+RAILWAY_STATIC_URL = config('RAILWAY_STATIC_URL', default=None)
+RAILWAY_PUBLIC_DOMAIN = config('RAILWAY_PUBLIC_DOMAIN', default=None)
 
-# Railway deployment
-RAILWAY_ENVIRONMENT = config('RAILWAY_ENVIRONMENT', default=None)
-if RAILWAY_ENVIRONMENT:
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Add Railway domain if present
+if RAILWAY_PUBLIC_DOMAIN:
+    ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
     ALLOWED_HOSTS.append('.railway.app')
-    CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+    CSRF_TRUSTED_ORIGINS = [f'https://{RAILWAY_PUBLIC_DOMAIN}', 'https://*.railway.app']
+else:
+    # Fallback for custom ALLOWED_HOSTS
+    custom_hosts = config('ALLOWED_HOSTS', default='')
+    if custom_hosts:
+        ALLOWED_HOSTS.extend([h.strip() for h in custom_hosts.split(',') if h.strip()])
 
 
 # Application definition
@@ -144,3 +153,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+
+# Logging configuration for debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
