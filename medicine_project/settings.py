@@ -80,14 +80,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'medicine_project.wsgi.application'
 
 
-# Database
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+
+# Database configuration: Always use PostgreSQL in production (Railway)
+import sys
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600, conn_health_checks=True)
+    }
+else:
+    if 'runserver' in sys.argv:
+        # Allow SQLite for local development only
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+    else:
+        raise Exception("DATABASE_URL not set! Add a PostgreSQL database in Railway.")
 
 
 # Password validation
