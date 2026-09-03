@@ -4,11 +4,16 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.conf import settings
+from decouple import config
 from .forms import SymptomForm
 from .models import PatientQuery
 from .ml_model import get_recommender
 import json
 from deep_translator import GoogleTranslator
+from openai import OpenAI
 
 
 def translate_hindi_symptoms(symptoms):
@@ -65,12 +70,6 @@ def translate_medicine_to_regional_language(recommendations, language_code):
 def home(request):
     """Home page view"""
     return render(request, 'recommendation/home.html')
-
-
-@login_required
-def about(request):
-    """About page view"""
-    return render(request, 'recommendation/about.html')
 
 
 @login_required
@@ -210,3 +209,65 @@ def user_logout(request):
     logout(request)
     messages.info(request, 'You have been logged out successfully.')
     return redirect('home')
+
+
+CHATBOT_SYSTEM_PROMPT = (
+    "You are MediBot, a friendly AI health assistant embedded in the MediMatch web app. "
+    "Provide general, educational information about common health topics, symptoms, "
+    "over-the-counter medicines, wellness, and when to see a doctor. "
+    "Be concise (use short paragraphs or bullet points). "
+    "Never diagnose conditions, prescribe prescription medication, or replace a medical "
+    "professional. Always include a brief disclaimer to consult a qualified doctor for "
+    "personal medical advice. Respond in the same language the user wrote in."
+)
+
+
+@require_POST
+def chatbot_api(request):
+    """Endpoint for the floating Groq-powered chatbot widget."""
+    api_key = config('GROQ_API_KEY', default='')
+    if not api_key:
+        return JsonResponse(
+            {'error': 'Chatbot is not configured. Please set GROQ_API_KEY in the environment.'},
+            status=503,
+        )
+
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid request payload.'}, status=400)
+
+    history = payload.get('history') or []
+    user_message = (payload.get('message') or '').strip()
+    if not user_message:
+        return JsonResponse({'error': 'Empty message.'}, status=400)
+
+    model_name = config('GROQ_MODEL', default='openai/gpt-oss-20b')
+
+    input_lines = []
+    for turn in history[-20:]:
+        role = turn.get('role')
+        text = (turn.get('text') or '').strip()
+        if not text:
+            continue
+        if role == 'user':
+            input_lines.append({'role': 'user', 'content': text})
+        elif role == 'assistant':
+            input_lines.append({'role': 'assistant', 'content': text})
+    input_lines.append({'role': 'user', 'content': user_message})
+
+    try:
+        client = OpenAI(api_key=api_key, base_url='https://api.groq.com/openai/v1')
+        response = client.responses.create(
+            model=model_name,
+            instructions=CHATBOT_SYSTEM_PROMPT,
+            input=input_lines,
+            temperature=0.5,
+        )
+        reply = (getattr(response, 'output_text', '') or '').strip() or "I'm sorry, I couldn't generate a response. Please try again."
+        return JsonResponse({'reply': reply})
+    except Exception as e:
+        return JsonResponse(
+            {'error': f'Chatbot error: {e}'},
+            status=500,
+        )
