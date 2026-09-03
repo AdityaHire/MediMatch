@@ -214,3 +214,120 @@ msgstr "तुमचे वय प्रविष्ट करा"
 
 msgid "Any existing medical conditions or allergies (optional)"
 msgstr "कोणत्याही विद्यमान वैद्यकीय स्थिती किंवा ऍलर्जी (पर्यायी)"
+
+msgid "Nearby Care"
+msgstr "जवळील देखाळ"
+
+msgid "Nearby Medical Facilities"
+msgstr "जवळील वैद्यकीय सुविधा"
+
+msgid "Find hospitals, clinics, and pharmacies near you"
+msgstr "तुमच्या जवळील रुग्णालये, क्लिनिक्स आणि औषधालये शोधा"
+
+msgid "LocationIQ API key is not configured. Add LOCATIONIQ_API_KEY to your environment to use this feature."
+msgstr "LocationIQ API की कॉन्फ़िगर केलेली नाही. या वैशिष्ट्य वापरण्यासाठी तुमच्या वातावरणात LOCATIONIQ_API_KEY जोडा."
+
+msgid "Location"
+msgstr "स्थान"
+
+msgid "Enter address or city"
+msgstr "पत्ता किंवा शहर प्रविष्ट करा"
+
+msgid "Enter an address, or click the GPS button to use your current location."
+msgstr "एक पत्ता प्रविष्ट करा, किंवा तुमचा सध्या स्थान वापरण्यासाठी GPS बटण क्लिक करा."
+
+msgid "Facility Type"
+msgstr "सुविधेचा प्रकार"
+
+msgid "All Types"
+msgstr "सर्व प्रकार"
+
+msgid "Hospitals"
+msgstr "रुग्णालये"
+
+msgid "Clinics"
+msgstr "क्लिनिक्स"
+
+msgid "Pharmacies"
+msgstr "औषधालये"
+
+msgid "Radius"
+msgstr "त्रिज्या"
+
+msgid "1 km"
+msgstr "१ किमी"
+
+msgid "3 km"
+msgstr "३ किमी"
+
+msgid "5 km"
+msgstr "५ किमी"
+
+msgid "10 km"
+msgstr "१० किमी"
+
+msgid "20 km"
+msgstr "२० किमी"
+
+msgid "Search"
+msgstr "शोध"
+
+msgid "Please enter a location or use the GPS button to detect your current location."
+msgstr "कृपया एक स्थान प्रविष्ट करा किंवा तुमचा सध्या स्थान शोधण्यासाठी GPS बटण वापरा."
+
+msgid "Map of nearby facilities"
+msgstr "जवळील सुविधांचा मॅप"
+
+msgid "Search Results"
+msgstr "शोध परिणाम"
+
+msgid "Near"
+msgstr "जवळ"
+
+msgid "Distance"
+msgstr "अंतर"
+
+msgid "meters"
+msgstr "मीटर"
+
+msgid "km"
+msgstr "किमी"
+
+msgid "Unnamed"
+msgstr "नाविलेले नाही"
+
+msgid "View on Map"
+msgstr "मॅपवरून बघा"
+
+msgid "No facilities found"
+msgstr "कोणतीही सुविधा सापडली नाही"
+
+msgid "No matching facilities were found in this area. Try expanding your search radius or location."
+msgstr "या क्षेत्रात कोणतीही जुळवणारी सुविधा सापडली नाही. तुमची शोध त्रिज्या किंवा स्थान वाढवण्याचा प्रयत्न केला यावा."
+
+msgid "How it works"
+msgstr "कसे काम करते"
+
+msgid "We use the LocationIQ API to search OpenStreetMap data for nearby medical facilities including hospitals, clinics, and pharmacies."
+msgstr "आम्ही रुग्णालये, क्लिनिक्स आणि औषधालये यांसह जवळील वैद्यकीय सुविधांसाठी OpenStreetMap डेटामध्ये शोधण्यासाठी LocationIQ API वापरतो."
+
+msgid "Emergency"
+msgstr "आपत्कालीन"
+
+msgid "In a medical emergency, call your local emergency number immediately."
+msgstr "एक वैद्यकीय आपत्कालीन परिस्थितीमध्ये, तातडीने तुमचा स्थानीय आपत्कालीन क्रमांक कॉल करा."
+
+msgid "Geolocation is not supported by your browser."
+msgstr "तुमचा ब्राउझर भौगोलिक स्थान निर्धारण समर्थित नाही."
+
+msgid "Unable to retrieve your location. Please enter an address manually."
+msgstr "तुमचा स्थान मिळवता आला नाही. कृपया स्वयंचलितपणे पत्ता प्रविष्ट करा."
+
+msgid "Use my current location"
+msgstr "माझा सध्या स्थान वापरा"
+
+msgid "Find Nearby Care"
+msgstr "जवळील देखाळ शोधा"
+
+msgid "Find hospitals, clinics, and pharmacies near your location"
+msgstr "तुमच्या स्थानी जवळील रुग्णालये, क्लिनिक्स आणि औषधालये शोधा"

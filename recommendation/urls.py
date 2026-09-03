@@ -10,4 +10,5 @@ urlpatterns = [
     path('register/', views.user_register, name='register'),
     path('logout/', views.user_logout, name='logout'),
     path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
+    path('nearby/', views.nearby, name='nearby'),
 ]

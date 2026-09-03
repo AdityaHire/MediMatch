@@ -14,6 +14,7 @@ from .ml_model import get_recommender
 import json
 from deep_translator import GoogleTranslator
 from openai import OpenAI
+from .locationiq import geocode_address, get_nearby_facilities, is_configured, build_map_url
 
 
 def translate_hindi_symptoms(symptoms):
@@ -209,6 +210,74 @@ def user_logout(request):
     logout(request)
     messages.info(request, 'You have been logged out successfully.')
     return redirect('home')
+
+
+@login_required
+def nearby(request):
+    """Find nearby hospitals, clinics, and pharmacies using LocationIQ."""
+    api_configured = is_configured()
+
+    facilities = None
+    error = None
+    searched = False
+    location_name = ''
+    map_url = None
+
+    if request.method == 'POST' and api_configured:
+        searched = True
+        location = (request.POST.get('location') or '').strip()
+        lat = (request.POST.get('lat') or '').strip()
+        lon = (request.POST.get('lon') or '').strip()
+        facility_type = request.POST.get('facility_type', 'all')
+        try:
+            radius = int(request.POST.get('radius', '5000'))
+        except (ValueError, TypeError):
+            radius = 5000
+        radius = max(1000, min(radius, 20000))
+
+        center_lat = None
+        center_lon = None
+
+        if lat and lon:
+            try:
+                center_lat = float(lat)
+                center_lon = float(lon)
+                location_name = (request.POST.get('location_name') or '').strip()
+                if not location_name:
+                    location_name = '{}, {}'.format(lat, lon)
+            except ValueError:
+                error = 'Invalid coordinates received.'
+        elif location:
+            geocoded = geocode_address(location)
+            if geocoded:
+                center_lat = geocoded['lat']
+                center_lon = geocoded['lon']
+                location_name = geocoded['display_name']
+            else:
+                error = 'Could not find the location "%s". Please try a more specific address.' % location
+        else:
+            error = 'Please enter a location or use the GPS button to detect your current location.'
+
+        if center_lat is not None and center_lon is not None and not error:
+            facilities = get_nearby_facilities(
+                center_lat, center_lon, facility_type, radius
+            )
+            if facilities:
+                map_url = build_map_url(center_lat, center_lon, facilities)
+            else:
+                location_name = location_name or '{}'.format(location)
+
+    context = {
+        'facilities': facilities,
+        'error': error,
+        'searched': searched,
+        'location_name': location_name,
+        'map_url': map_url,
+        'api_configured': is_configured(),
+        'selected_type': request.POST.get('facility_type', 'all') if request.method == 'POST' else 'all',
+        'selected_radius': request.POST.get('radius', '5000') if request.method == 'POST' else '5000',
+    }
+    return render(request, 'recommendation/nearby.html', context)
 
 
 CHATBOT_SYSTEM_PROMPT = (

@@ -356,6 +356,21 @@ footer {
     background: var(--primary-dark);
 }
 
+/* Nearby Facilities Page */
+.facility-card {
+    transition: transform 0.2s ease;
+}
+
+.facility-card:hover {
+    transform: translateY(-3px);
+}
+
+.map-placeholder {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
 /* Navbar & Language Dropdown Styles */
 .navbar-dark .navbar-brand {
     font-weight: 700;

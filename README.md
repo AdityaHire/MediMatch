@@ -9,6 +9,7 @@ An intelligent medicine recommendation system that helps users find appropriate 
 - 📊 Personalized recommendations based on age, gender, and medical history
 - 📜 Query history tracking
 - 🎨 Modern, responsive UI with Bootstrap 5
+- 🏥 Nearby medical facilities finder (hospitals, clinics, pharmacies)
 
 ## Technologies Used
 
@@ -127,6 +128,9 @@ Compatible with: Heroku, Render, Railway, PythonAnywhere, and other PaaS platfor
 - `SECRET_KEY`: Django secret key (required for production)
 - `DEBUG`: Debug mode (False for production)
 - `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
+- `GROQ_API_KEY`: API key for the MediBot chatbot
+- `GROQ_MODEL`: Groq model name for the chatbot
+- `LOCATIONIQ_API_KEY`: API key for LocationIQ (required for the Nearby Care feature). Get it from https://my.locationiq.com/
 
 ## Usage
 
@@ -136,6 +140,17 @@ Compatible with: Heroku, Render, Railway, PythonAnywhere, and other PaaS platfor
 4. Select language preference (English/Hindi)
 5. Get personalized medicine recommendations
 6. View recommendation history
+
+### Finding Nearby Medical Facilities
+
+1. Log in to your account
+2. Click "Nearby Care" in the navigation bar (or the "Find Nearby Care" button on the home page)
+3. Enter your address or click the GPS button to use your current location
+4. Select the facility type (Hospitals, Clinics, Pharmacies, or All)
+5. Set your search radius
+6. Click "Search" to see results on a map and as a list
+
+> **Note:** This feature requires a LocationIQ API key. Add `LOCATIONIQ_API_KEY` to your `.env` file. Get a free key at https://my.locationiq.com/
 
 ## Project Structure
 
