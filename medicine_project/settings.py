@@ -97,7 +97,7 @@ db_name = config('DB_NAME', default=None)
 
 if database_url:
     DATABASES = {
-        'default': dj_database_url.parse(database_url, conn_max_age=600)
+        'default': dj_database_url.parse(database_url, conn_max_age=0, ssl_require=True)
     }
 elif db_name:
     DATABASES = {
@@ -162,6 +162,9 @@ LANGUAGE_COOKIE_HTTPONLY = False
 LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 TIME_ZONE = 'UTC'
+
+# Use signed cookie session engine for serverless speed and reliability
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 USE_I18N = True
 

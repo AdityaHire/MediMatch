@@ -93,11 +93,14 @@ def recommend(request):
                 top_n=5
             )
             
-            # Save query to database
-            query = form.save(commit=False)
-            query.user = request.user if request.user.is_authenticated else None
-            query.recommended_medicines = json.dumps(recommendations)
-            query.save()
+            # Save query to database (gracefully handled if DB has serverless network delay)
+            try:
+                query = form.save(commit=False)
+                query.user = request.user if request.user.is_authenticated else None
+                query.recommended_medicines = json.dumps(recommendations)
+                query.save()
+            except Exception as e:
+                print(f"Database save warning: {e}")
             
             # Store in session for results page
             request.session['recommendations'] = recommendations
@@ -139,10 +142,14 @@ def results(request):
 
 def history(request):
     """View past queries"""
-    if request.user.is_authenticated:
-        queries = PatientQuery.objects.filter(user=request.user).order_by('-created_at')[:10]
-    else:
-        queries = PatientQuery.objects.all().order_by('-created_at')[:10]
+    try:
+        if request.user.is_authenticated:
+            queries = PatientQuery.objects.filter(user=request.user).order_by('-created_at')[:10]
+        else:
+            queries = PatientQuery.objects.all().order_by('-created_at')[:10]
+    except Exception as e:
+        print(f"Database query warning: {e}")
+        queries = []
     
     # Parse JSON recommendations for each query
     for query in queries:
