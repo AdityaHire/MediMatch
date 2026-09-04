@@ -96,8 +96,9 @@ database_url = config('DATABASE_URL', default=os.environ.get('DATABASE_URL', '')
 db_name = config('DB_NAME', default=None)
 
 if database_url:
+    is_sqlite = database_url.strip().startswith('sqlite')
     DATABASES = {
-        'default': dj_database_url.parse(database_url, conn_max_age=0, ssl_require=True)
+        'default': dj_database_url.parse(database_url, conn_max_age=0, ssl_require=not is_sqlite)
     }
 elif db_name:
     DATABASES = {
