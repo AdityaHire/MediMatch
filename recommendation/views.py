@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.conf import settings
@@ -73,7 +70,6 @@ def home(request):
     return render(request, 'recommendation/home.html')
 
 
-@login_required
 def recommend(request):
     """Medicine recommendation view"""
     if request.method == 'POST':
@@ -99,7 +95,7 @@ def recommend(request):
             
             # Save query to database
             query = form.save(commit=False)
-            query.user = request.user
+            query.user = request.user if request.user.is_authenticated else None
             query.recommended_medicines = json.dumps(recommendations)
             query.save()
             
@@ -119,7 +115,6 @@ def recommend(request):
     return render(request, 'recommendation/recommend.html', {'form': form})
 
 
-@login_required
 def results(request):
     """Display recommendation results"""
     recommendations = request.session.get('recommendations', [])
@@ -142,10 +137,12 @@ def results(request):
     return render(request, 'recommendation/results.html', context)
 
 
-@login_required
 def history(request):
     """View past queries"""
-    queries = PatientQuery.objects.filter(user=request.user).order_by('-created_at')[:10]  # Last 10 queries for current user
+    if request.user.is_authenticated:
+        queries = PatientQuery.objects.filter(user=request.user).order_by('-created_at')[:10]
+    else:
+        queries = PatientQuery.objects.all().order_by('-created_at')[:10]
     
     # Parse JSON recommendations for each query
     for query in queries:
@@ -157,62 +154,6 @@ def history(request):
     return render(request, 'recommendation/history.html', {'queries': queries})
 
 
-def user_login(request):
-    """User login view"""
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back, {username}!')
-                next_url = request.GET.get('next', 'home')
-                return redirect(next_url)
-            else:
-                messages.error(request, 'Invalid username or password.')
-        else:
-            messages.error(request, 'Invalid username or password.')
-    else:
-        form = AuthenticationForm()
-    
-    return render(request, 'recommendation/login.html', {'form': form})
-
-
-def user_register(request):
-    """User registration view"""
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created successfully for {username}! Please login.')
-            return redirect('login')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f'{error}')
-    else:
-        form = UserCreationForm()
-    
-    return render(request, 'recommendation/register.html', {'form': form})
-
-
-def user_logout(request):
-    """User logout view"""
-    logout(request)
-    messages.info(request, 'You have been logged out successfully.')
-    return redirect('home')
-
-
-@login_required
 def nearby(request):
     """Find nearby hospitals, clinics, and pharmacies using LocationIQ."""
     api_configured = is_configured()
@@ -327,13 +268,24 @@ def chatbot_api(request):
 
     try:
         client = OpenAI(api_key=api_key, base_url='https://api.groq.com/openai/v1')
-        response = client.responses.create(
-            model=model_name,
-            instructions=CHATBOT_SYSTEM_PROMPT,
-            input=input_lines,
-            temperature=0.5,
-        )
-        reply = (getattr(response, 'output_text', '') or '').strip() or "I'm sorry, I couldn't generate a response. Please try again."
+        messages = [{'role': 'system', 'content': CHATBOT_SYSTEM_PROMPT}] + input_lines
+        try:
+            completion = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=0.5,
+            )
+            reply = completion.choices[0].message.content.strip()
+        except Exception:
+            response = client.responses.create(
+                model=model_name,
+                instructions=CHATBOT_SYSTEM_PROMPT,
+                input=input_lines,
+                temperature=0.5,
+            )
+            reply = (getattr(response, 'output_text', '') or '').strip()
+
+        reply = reply or "I'm sorry, I couldn't generate a response. Please try again."
         return JsonResponse({'reply': reply})
     except Exception as e:
         return JsonResponse(

@@ -17,28 +17,32 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-chang
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-# Railway deployment - get the domain
-RAILWAY_STATIC_URL = config('RAILWAY_STATIC_URL', default=None)
+# Vercel & Deployment Hosts
+VERCEL = config('VERCEL', default=os.environ.get('VERCEL', ''))
+VERCEL_URL = config('VERCEL_URL', default=os.environ.get('VERCEL_URL', ''))
 RAILWAY_PUBLIC_DOMAIN = config('RAILWAY_PUBLIC_DOMAIN', default=None)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '.vercel.app', '.now.sh']
+CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
 
-# Add Vercel domain if present
-VERCEL_URL = config('VERCEL_URL', default=None)
 if VERCEL_URL:
     ALLOWED_HOSTS.append(VERCEL_URL)
-    ALLOWED_HOSTS.append('.vercel.app')
-    CSRF_TRUSTED_ORIGINS = [f'https://{VERCEL_URL}', 'https://*.vercel.app']
-elif RAILWAY_PUBLIC_DOMAIN:
-    ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
-    ALLOWED_HOSTS.append('.railway.app')
-    CSRF_TRUSTED_ORIGINS = [f'https://{RAILWAY_PUBLIC_DOMAIN}', 'https://*.railway.app']
-else:
-    # Fallback for custom ALLOWED_HOSTS
-    custom_hosts = config('ALLOWED_HOSTS', default='')
-    if custom_hosts:
-        ALLOWED_HOSTS.extend([h.strip() for h in custom_hosts.split(',') if h.strip()])
-        CSRF_TRUSTED_ORIGINS = [f'https://{h.strip()}' for h in custom_hosts.split(',') if h.strip() and not h.strip().startswith('.')]
+    CSRF_TRUSTED_ORIGINS.append(f'https://{VERCEL_URL}')
+
+if RAILWAY_PUBLIC_DOMAIN:
+    ALLOWED_HOSTS.extend([RAILWAY_PUBLIC_DOMAIN, '.railway.app'])
+    CSRF_TRUSTED_ORIGINS.extend([f'https://{RAILWAY_PUBLIC_DOMAIN}', 'https://*.railway.app'])
+
+# Custom ALLOWED_HOSTS from env
+custom_hosts = config('ALLOWED_HOSTS', default='')
+if custom_hosts:
+    for h in custom_hosts.split(','):
+        h = h.strip()
+        if h:
+            ALLOWED_HOSTS.append(h)
+            if not h.startswith('.'):
+                CSRF_TRUSTED_ORIGINS.append(f'https://{h}')
+
 
 
 # Application definition
@@ -87,23 +91,35 @@ WSGI_APPLICATION = 'medicine_project.wsgi.application'
 
 
 
-# Database configuration: Always use PostgreSQL in production (Railway)
-import sys
-if 'DATABASE_URL' in os.environ:
+# Database configuration
+database_url = config('DATABASE_URL', default=os.environ.get('DATABASE_URL', ''))
+db_name = config('DB_NAME', default=None)
+
+if database_url:
     DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600, conn_health_checks=True)
+        'default': dj_database_url.parse(database_url, conn_max_age=600)
+    }
+elif db_name:
+    DATABASES = {
+        'default': {
+            'ENGINE': config('DB_ENGINE', default='django.db.backends.mysql'),
+            'NAME': db_name,
+            'USER': config('DB_USER', default=''),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='3306'),
+        }
     }
 else:
-    if 'runserver' in sys.argv:
-        # Allow SQLite for local development only
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
-            }
+    # On Vercel, the filesystem is read-only except /tmp
+    is_vercel = bool(VERCEL or VERCEL_URL or os.environ.get('VERCEL'))
+    db_path = '/tmp/db.sqlite3' if is_vercel else (BASE_DIR / 'db.sqlite3')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': db_path,
         }
-    else:
-        raise Exception("DATABASE_URL not set! Add a PostgreSQL database in Railway.")
+    }
 
 
 # Password validation
@@ -160,15 +176,11 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Whitenoise configuration for serving static files in production
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Authentication settings
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
 
 # Logging configuration for debugging
 LOGGING = {

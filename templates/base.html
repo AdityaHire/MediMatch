@@ -35,40 +35,21 @@
                             <i class="fas fa-home"></i> {% trans "Home" %}
                         </a>
                     </li>
-                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'recommend' %}">
+                            <i class="fas fa-stethoscope"></i> {% trans "Get Recommendations" %}
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'nearby' %}">
                             <i class="fas fa-map-marker-alt"></i> {% trans "Nearby Care" %}
                         </a>
                     </li>
-                    
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle p-0" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px; cursor: pointer;">
-                                <i class="fas fa-user text-primary"></i>
-                            </div>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li><a class="dropdown-item" href="{% url 'history' %}">
-                                <i class="fas fa-history"></i> {% trans "History" %}
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'logout' %}">
-                                <i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}
-                            </a></li>
-                        </ul>
-                    </li>
-                    {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">
-                            <i class="fas fa-sign-in-alt"></i> {% trans "Login" %}
+                        <a class="nav-link" href="{% url 'history' %}">
+                            <i class="fas fa-history"></i> {% trans "History" %}
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-outline-light ms-2" href="{% url 'register' %}">
-                            <i class="fas fa-user-plus"></i> {% trans "Register" %}
-                        </a>
-                    </li>
-                    {% endif %}
                 </ul>
             </div>
         </div>
