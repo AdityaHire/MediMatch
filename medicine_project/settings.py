@@ -23,8 +23,13 @@ RAILWAY_PUBLIC_DOMAIN = config('RAILWAY_PUBLIC_DOMAIN', default=None)
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-# Add Railway domain if present
-if RAILWAY_PUBLIC_DOMAIN:
+# Add Vercel domain if present
+VERCEL_URL = config('VERCEL_URL', default=None)
+if VERCEL_URL:
+    ALLOWED_HOSTS.append(VERCEL_URL)
+    ALLOWED_HOSTS.append('.vercel.app')
+    CSRF_TRUSTED_ORIGINS = [f'https://{VERCEL_URL}', 'https://*.vercel.app']
+elif RAILWAY_PUBLIC_DOMAIN:
     ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
     ALLOWED_HOSTS.append('.railway.app')
     CSRF_TRUSTED_ORIGINS = [f'https://{RAILWAY_PUBLIC_DOMAIN}', 'https://*.railway.app']
@@ -33,6 +38,7 @@ else:
     custom_hosts = config('ALLOWED_HOSTS', default='')
     if custom_hosts:
         ALLOWED_HOSTS.extend([h.strip() for h in custom_hosts.split(',') if h.strip()])
+        CSRF_TRUSTED_ORIGINS = [f'https://{h.strip()}' for h in custom_hosts.split(',') if h.strip() and not h.strip().startswith('.')]
 
 
 # Application definition
